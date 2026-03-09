@@ -35,4 +35,16 @@ return [
         ],
     ],
 
+    'cities' => [
+        'url' => env('CITY_SETTINGS_SERVICE_URL'),
+    ],
+
+    'packages' => [
+        'url' => env('PACKAGE_SETTINGS_SERVICE_URL'),
+    ],
+
+    'users' => [
+        'url' => env('USER_SETTINGS_SERVICE_URL'),
+    ],
+
 ];

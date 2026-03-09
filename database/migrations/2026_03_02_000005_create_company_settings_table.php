@@ -9,8 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('company_settings', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
+            $table->uuid('id')->primary();
+            $table->uuid('company_id')->index();
 
             // Meter & image settings
             $table->boolean('is_meter_number_required')->default(false);
@@ -47,6 +47,7 @@ return new class extends Migration
             $table->boolean('allow_multiple_assignments')->default(true);
 
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

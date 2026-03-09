@@ -17,6 +17,7 @@ class UpdateCompanySettingsRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'company_id'                    => 'required|string',
             'is_meter_number_required'      => 'boolean',
             'is_meter_image_required'       => 'boolean',
             'is_code_changeable'            => 'boolean',

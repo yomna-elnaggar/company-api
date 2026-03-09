@@ -23,49 +23,34 @@ class CreateCompanyRequest extends FormRequest
                 'regex:/^3\d{13}3$/',
                 'unique:companies,tax_id',
             ],
-            'commercial_record'          => ['nullable', 'string', 'max:255'],
+            'image'                      => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'commerce_letter'            => ['nullable', 'file', 'mimes:pdf,jpeg,png,jpg', 'max:2048'],
+            'commercial_record'          => ['nullable', 'file', 'mimes:pdf', 'max:2048'],
             'national_id'                => ['nullable', 'string', 'max:255'],
-            'commerce_letter'            => ['nullable', 'string', 'max:255'],
             'contact_id'                 => ['nullable', 'string', 'max:255'],
             'electronic_contract_website'=> ['nullable', 'url', 'max:255'],
-            'city_id'                    => ['nullable', 'integer', 'exists:cities,id'],
-            'sale_person_id'             => ['nullable', 'integer', 'exists:sale_people,id'],
+            'city_id'                    => ['nullable', 'string'],
+            'sale_person_id'             => ['nullable', 'string'],
 
-            // ── Company User ──────────────────────────────────────────────────
-            'user.name'                  => ['required', 'string', 'max:255'],
-            'user.email'                 => ['required', 'email', 'max:255', 'unique:users,email'],
-            'user.username'              => ['required', 'string', 'max:255', 'unique:users,username'],
-            'user.password'              => ['required', 'string', 'min:8'],
-            'user.mobile'               => ['required', 'string', 'max:20', 'unique:users,mobile'],
-            'user.iqama'                 => ['nullable', 'string', 'max:255'],
-            'user.image'                 => ['nullable', 'image', 'max:2048'],
+
+            // ── User / Manager (for Microservice) ────────────────────────────
+            'name'                       => ['required', 'string', 'max:255'],
+            'email'                      => ['required', 'email', 'max:255'],
+            'mobile'                     => ['required', 'string', 'max:20'],
+            'password'                   => ['required', 'confirmed', 'string', 'min:8'],
+            'password_confirmation'      => ['required', 'string', 'min:8'],
+            'username'                   => ['nullable', 'string', 'max:255'],
+
+
+            // ── Package ──────────────────────────────────────────────────────
+            'package_id'                 => ['nullable', 'string'],
+            'vehicle_number'             => ['nullable', 'integer', 'min:1'],
+            'price'                      => ['nullable', 'numeric'],
+            'price_with_tax'             => ['nullable', 'numeric'],
+            'start_date'                 => ['nullable', 'date'],
+            'end_date'                   => ['nullable', 'date', 'after_or_equal:start_date'],
+            'payment_status'             => ['nullable', 'string'],
         ];
     }
 
-    public function messages(): array
-    {
-        return [
-            'tax_id.required'         => 'Tax ID is required.',
-            'tax_id.size'             => 'Tax ID must be exactly 15 digits.',
-            'tax_id.regex'            => 'Tax ID must be 15 digits and start/end with 3.',
-            'tax_id.unique'           => 'This Tax ID is already registered.',
-            'city_id.exists'          => 'The selected city does not exist.',
-            'user.email.unique'       => 'This email is already taken.',
-            'user.mobile.unique'      => 'This mobile number is already taken.',
-            'user.username.unique'    => 'This username is already taken.',
-        ];
-    }
-
-    public function attributes(): array
-    {
-        return [
-            'user.name'     => 'user name',
-            'user.email'    => 'user email',
-            'user.username' => 'username',
-            'user.password' => 'user password',
-            'user.mobile'   => 'mobile number',
-            'user.iqama'    => 'iqama number',
-            'user.image'    => 'user image',
-        ];
-    }
 }
