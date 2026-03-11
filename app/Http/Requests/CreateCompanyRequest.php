@@ -21,7 +21,7 @@ class CreateCompanyRequest extends FormRequest
                 'string',
                 'size:15',
                 'regex:/^3\d{13}3$/',
-                'unique:companies,tax_id',
+                'unique:companies,tax_id,' . ($this->route('id') ?? $this->route('company') ?? 'NULL') . ',id',
             ],
             'image'                      => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
             'commerce_letter'            => ['nullable', 'file', 'mimes:pdf,jpeg,png,jpg', 'max:2048'],
@@ -35,10 +35,9 @@ class CreateCompanyRequest extends FormRequest
 
             // ── User / Manager (for Microservice) ────────────────────────────
             'name'                       => ['required', 'string', 'max:255'],
-            'email'                      => ['required', 'email', 'max:255'],
+            'email'                      => ['nullable', 'email', 'max:255'],
             'mobile'                     => ['required', 'string', 'max:20'],
-            'password'                   => ['required', 'confirmed', 'string', 'min:8'],
-            'password_confirmation'      => ['required', 'string', 'min:8'],
+            'password'                   => [$this->isMethod('post') ? 'required' : 'nullable', 'confirmed', 'string', 'min:8'],
             'username'                   => ['nullable', 'string', 'max:255'],
 
 

@@ -11,7 +11,7 @@ use App\Models\CompanySetting;
 use App\Models\User;
 use App\Services\CityService;
 use App\Services\PackageService;
-use App\Services\UserService;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -32,12 +32,11 @@ class CompanyController extends ApiController
     /**
      * Instantiate a new controller instance.
      */
-    public function __construct(CRUDRepositoryInterface $itemRepository, CityService $cityService, PackageService $packageService, UserService $userService)
+    public function __construct(CRUDRepositoryInterface $itemRepository, CityService $cityService, PackageService $packageService)
     {
         $this->itemRepository = $itemRepository;
         $this->cityService = $cityService;
         $this->packageService = $packageService;
-        $this->userService = $userService;
     }
 
     public function index(Request $request)
@@ -173,17 +172,18 @@ class CompanyController extends ApiController
             // 2. Create company
             $item = $this->itemRepository->createItem($this->model, $data);
 
-            // 3. Create User in User Microservice
-            // $userData = [
-            //     'name'       => $validated['name'] ?? $validated['company_name'],
-            //     'mobile'     => $validated['mobile'],
-            //     'password'   => $validated['password'], // Service should handle hashing or hash here
-            //     'image'      => $data['image'] ?? null,
-            //     'username'   => $validated['username'] ?? $validated['email'],
-            //     'company_id' => $item->id,
-            //     'user_type_id' => 2,
-            // ];
-            // $this->userService->createUser($userData);
+            // 3. Create User Locally
+            $userData = [
+                'name'       => $validated['name'] ?? $validated['company_name'],
+                'mobile'     => $validated['mobile'],
+                'email'      => $validated['email'],
+                'password'   => $validated['password'], // User model handles hashing via mutator
+                'image'      => $data['image'] ?? null,
+                'username'   => $validated['username'] ?? $validated['email'],
+                'company_id' => $item->id,
+                'active'     => true,
+            ];
+            User::create($userData);
 
             // 4. Create main branch
             $this->itemRepository->createItem(Branch::class, [
@@ -244,17 +244,20 @@ class CompanyController extends ApiController
             // 1. Update company
             $item = $this->itemRepository->updateItem($this->model, $id, $data);
 
-            // 2. Update User in Microservice (Manager's image/password)
-            // $user = $this->userService->getUserByCompanyId($id);
-            // if ($user && isset($user['id'])) {
-            //     $userData = [];
-            //     if (isset($data['password'])) $userData['password'] = $data['password'];
-            //     if (isset($data['image'])) $userData['image'] = $data['image'];
+            // 2. Update User Locally (Manager's image/password)
+            $user = User::where('company_id', $id)->first();
+            if ($user) {
+                $userData = [];
+                if (isset($data['password'])) $userData['password'] = $data['password'];
+                if (isset($data['image'])) $userData['image'] = $data['image'];
+                if (isset($data['mobile'])) $userData['mobile'] = $data['mobile'];
+                if (isset($data['email'])) $userData['email'] = $data['email'];
+                if (isset($data['name'])) $userData['name'] = $data['name'];
                 
-            //     if (!empty($userData)) {
-            //         $this->userService->updateUser($user['id'], $userData);
-            //     }
-            // }
+                if (!empty($userData)) {
+                    $user->update($userData);
+                }
+            }
 
             // 3. Update Subscription via Service (Parity with Yomna)
             if ($request->filled('package_id')) {
